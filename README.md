@@ -5,6 +5,10 @@
 
 ### extract_gmd.py
 
+```python
+python extract_gmd.py mes_system_eng.gmd
+```
+
 gmd2txt，导出格式示例：
 
 ```
@@ -20,9 +24,17 @@ OK
 
 ### repack_gmd.py
 
-txt2gmd。txt与原始gmd文件需在同路径下，原始gmd默认使用英语版`_eng`。
+```python
+python repack_gmd.py mes_system_eng.gmd
+```
+
+txt2gmd。txt与原始gmd文件需在同路径下，会复制原始gmd的文件头。原始gmd默认使用英语版`_eng`。
 
 ### merge_text.py
+
+```python
+python merge_text.py mes_system
+```
 
 合并两种不同语言文本。默认为英语`_eng`和日语`_jpn`。
 
@@ -48,7 +60,13 @@ English
 
 ### merge_text_sizehack.py
 
+```python
+python merge_text_sizehack.py mes_system --flatten-eng
+```
+
 在`merge_text.py`的基础上新增功能，合并时在每行文本开头增加内联代码`<SIZE>`定义字号。两种语言字号可分别定义。
+
+可选参数`--flatten-eng`，清除所有英语文本中的换行，合并为一行显示。
 
 合并后格式示例：
 
@@ -59,6 +77,10 @@ English
 ```
 
 ### format_key_guide.py
+
+```python
+python format_key_guide.py mes_system_merged.txt
+```
 
 精简合并后的键位引导文本。部分文本仍需手动调整。
 
@@ -72,6 +94,14 @@ English
 [Line 2780]
 <KEY 1> MAIN MENU メインメニュー
 ```
+
+### format_linebreak.py
+
+```python
+python format_linebreak.py input.txt
+```
+
+清除英语文本中的所有换行合并为整段，并按照指定字符数长度（默认为135）重新换行。
 
 ## 致谢
 

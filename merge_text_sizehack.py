@@ -6,7 +6,7 @@ import argparse
 ENG_TEXT_SIZE = "18"
 JPN_TEXT_SIZE = "18" 
 
-def parse_localization_file(filepath, text_size):
+def parse_localization_file(filepath, text_size, flatten=False):
     """
     解析本地化文本文件，并根据传入的 text_size 为非空行添加 <SIZE> 标签。
     """
@@ -32,6 +32,15 @@ def parse_localization_file(filepath, text_size):
         while data[key] and data[key][-1] == '':
             data[key].pop()
             
+        # 新增：如果启用了 flatten（平铺），将多行合并为单行
+        if flatten and data[key]:
+            # 过滤掉中间可能的纯空行，把所有有内容的行用空格连接
+            valid_lines = [line for line in data[key] if line.strip()]
+            if valid_lines:
+                data[key] = [" ".join(valid_lines)]
+            else:
+                data[key] = []
+                
         for i in range(len(data[key])):
             if data[key][i].strip():  
                 # 根据传入的语言专属字号添加标签
@@ -45,10 +54,11 @@ def parse_localization_file(filepath, text_size):
         
     return header_str, data
 
-def merge_localization_files(eng_path, jpn_path, output_path):
+def merge_localization_files(eng_path, jpn_path, output_path, flatten_eng):
     # 解析时分别传入对应的字号
-    eng_header, eng_data = parse_localization_file(eng_path, ENG_TEXT_SIZE)
-    _, jpn_data = parse_localization_file(jpn_path, JPN_TEXT_SIZE)
+    # 为英文文件传入 flatten_eng 参数
+    eng_header, eng_data = parse_localization_file(eng_path, ENG_TEXT_SIZE, flatten=flatten_eng)
+    _, jpn_data = parse_localization_file(jpn_path, JPN_TEXT_SIZE, flatten=False)
     
     all_keys = set(eng_data.keys()).union(set(jpn_data.keys()))
     
@@ -117,6 +127,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="合并本地化文本，支持中英双语独立字号及 <CHAR> 标签智能处理。")
     parser.add_argument("basename", help="要合并的文件名主干。例如输入 'System'")
     
+    # 新增参数：--flatten-eng
+    parser.add_argument(
+        "--flatten-eng", 
+        action="store_true", 
+        help="启用此项时，将英文的多行文本合并为单行（用空格连接）。"
+    )
+    
     args = parser.parse_args()
     
     base_name = re.sub(r'_(chS|chT|eng|fre|ger|ita|jpn|pol|por|rus|spa)', '', args.basename)
@@ -127,7 +144,7 @@ if __name__ == "__main__":
     
     if os.path.exists(eng_file) and os.path.exists(jpn_file):
         print(f"正在合并: {eng_file} 和 {jpn_file} ...")
-        merge_localization_files(eng_file, jpn_file, output_file)
+        merge_localization_files(eng_file, jpn_file, output_file, args.flatten_eng)
         print(f"✅ 合并完成！结果已保存为: {output_file}")
     else:
         print(f"❌ 错误：找不到指定的文件。")
